@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+  *{
+    padding: 0;
+    margin: 0
+  }
+  .upload-box{
+    min-height: 100px;
+    display: flex;
+    flex-wrap: wrap;
+    padding: 10px;
+    justify-content: flex-start;
+  }
+   .upload-box .upload-img{
+    width: 70px;
+    height: 70px;
+    margin: 3px;
+    background-size: cover;
+    box-shadow: 0 0 3px #ccc;
+    background-repeat: no-repeat;
+    background-position: center center;
+   }
+  .upload-box .file-input{
+    width: 70px;
+    height: 70px;
+    background: url('add.png') no-repeat center;
+    background-size:  35px 35px;
+    border: 1px solid #bfbfbf;
+    position: relative;
+    margin: 3px;
+  }
+  .upload-box .file-input input{
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    opacity: 0
+  }
+  </style>
+</head>
+<body>
+   <input type="file" name="" id="imgfile" multiple>
+  <button type="button" id="btn">123</button>
+  <progress value="1" max="100" id="progress"></progress> 
+  <!-- <div class="upload-box">
+    <div class="upload-img" style="background-image: url(https://ss0.bdstatic.com/94oJfD_bAAcT8t7mm9GUKT-xh_/timg?image&quality=100&size=b4000_4000&sec=1501320372&di=3000947de066ef865ecaaf1a3dcc13bb&src=http://www.zhlzw.com/UploadFiles/Article_UploadFiles/201204/20120412123925693.jpg)"></div>
+    <div class="file-input">
+      <input type="file" id="fileInput" multiple>
+    </div>
+  </div> -->
+<script>
+  // var fileInput = document.querySelector('#fileInput')
+
+  // fileInput.addEventListener('change', uploadHandle, false);
+
+  // function uploadHandle () {
+
+  // }
+
+  // function ajax (url, files) {
+  //   var xhr = new XMLHttpRequest();
+  //   var formData = new FormData();
+
+  //   for (var i = 0, l = files.length; i < l; i++) {
+  //     formData.append('imgfile', files[i], files[i].name)
+  //   }
+  // }
+  var fileinput = document.querySelector('#imgfile');
+  var btn = document.querySelector('#btn');
+  var progress = document.querySelector('#progress');
+
+  btn.addEventListener('click', function(){
+    var xhr = new XMLHttpRequest();
+    var formdata = new FormData()
+
+    var files = fileinput.files;
+
+    if(!files[0]){
+      alert('没有选择图片')
+      return;
+    }
+
+    for (var i = 0; i < files.length; i++) {
+      formdata.append('imgfile', files[i], files[i].name)
+    }
+    xhr.upload.onprogress = function(e){
+      console.log(e)
+      if (e.lengthComputable) {
+        var percent = e.loaded / e.total * 100;
+        progress.value = percent;
+        if (percent >= 100) {
+          percent.value = 0;
+        }
+      }
+    }
+    xhr.open('POST', '/uploading')
+    xhr.onload = function(){
+      if (xhr.status === 200 && xhr.responseText === 'success') {
+        // previewDOM.innerHTML = '';
+        xhr = null;
+        // alert('上传成功')
+      }
+    }
+    xhr.send(formdata)
+    console.log(xhr.upload, 1)
+    
+  }, false)
+
+  fileinput.addEventListener('change', function(){
+    var files = fileinput.files;
+    var imgDOMArray = new Array(files.length)
+    var reader = [];
+    var thumbPic = [];
+    for (var i = 0; i < files.length; i++) {
+      reader[i] = new FileReader();
+      thumbPic[i] = document.createElement('div');
+      imgDOMArray[i] = document.createElement('img')
+      imgDOMArray[i].file = files[i]
+      thumbPic[i].appendChild(imgDOMArray[i])
+      document.body.appendChild(thumbPic[i])
+      reader[i].readAsDataURL(files[i]);
+      reader[i].onload = (function(img){
+        return function(e){
+          img.src = e.target.result
+        }
+      })(imgDOMArray[i])
+    }
+  },false)
+</script>
+</body>
+</html>
